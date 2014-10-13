@@ -62,6 +62,7 @@ mkdir -p "/home/$SSH_USER/.ssh/"
 touch "/home/$SSH_USER/.ssh/authorized_keys"
 cat "${WWW_DIRECTORY}/create-ssh-tunnel/install/ssh/provision.pub" >> "/home/$SSH_USER/.ssh/authorized_keys"
 chmod 600 "/home/$SSH_USER/.ssh/authorized_keys"
+chown -R "$SSH_USER" "/home/$SSH_USER/.ssh/"
 
 # Start the database server so it may be populated with the schema.
 service mysqld start
