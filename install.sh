@@ -16,6 +16,9 @@ SERVER_ADDRESS="192.168.1.121"
 
 WWW_DIRECTORY="/var/www/html"
 
+# The user VMs connect as to open a an SSH tunnel.
+SSH_USER="user"
+
 #########################################################
 # DO NOT MODIFY PAST THIS POINT.
 #########################################################
@@ -24,6 +27,8 @@ ORIG_DIR=$(pwd)
 
 yum -y install httpd mysql-server php php-pdo php-mysql
 mkdir -p "${WWW_DIRECTORY}/"
+
+adduser "$SSH_USER"
 
 service httpd stop
 service iptables stop
@@ -53,10 +58,10 @@ sed -i.bkp "s@MY_SERVER_ADDRESS@${SERVER_ADDRESS}@g" "${WWW_DIRECTORY}/create-ss
 sed -i.bkp "s@MY_SERVER_ADDRESS@${SERVER_ADDRESS}@g" "${WWW_DIRECTORY}/create-ssh-tunnel/install/crowd/ssh_check.sh"
 
 # Make sure the server can be accessed by the vms.
-mkdir -p "~/.ssh/"
-touch "~/.ssh/authorized_keys"
-cat "${WWW_DIRECTORY}/create-ssh-tunnel/install/ssh/provision.pub" >> "~/.ssh/authorized_keys"
-chmod 600 "~/.ssh/authorized_keys"
+mkdir -p "/home/$SSH_USER/.ssh/"
+touch "/home/$SSH_USER/.ssh/authorized_keys"
+cat "${WWW_DIRECTORY}/create-ssh-tunnel/install/ssh/provision.pub" >> "/home/$SSH_USER/.ssh/authorized_keys"
+chmod 600 "/home/$SSH_USER/.ssh/authorized_keys"
 
 # Start the database server so it may be populated with the schema.
 service mysqld start
