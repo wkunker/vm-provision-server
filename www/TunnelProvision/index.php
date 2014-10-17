@@ -95,7 +95,35 @@
 
 	if($stmt->rowCount() == 0) {
 		// Client with given MAC address does not exist in the DB.
-		// Return failure.
+		// Return new port.
+		$sql = 'select max(masterTunnelPort) from clientSystemMgmtTBL';
+		$stmt1 = $pdo->prepare($sql);
+		$stmt1->execute();
+		$row1 = current($stmt1->fetchAll(PDO::FETCH_ASSOC));
+		if(((int)$row1["max(masterTunnelPort)"]) >= 14000) {
+			$output['port'] = (string)((int)$row1["max(masterTunnelPort)"] + 1);
+			$output['status'] = 1;
+			$sql = 'insert into clientSystemMgmtTBL(clientUUID, MacAddressID, active, masterTunnelPort) values(:clientUUID, :MacAddressID, :active, :masterTunnelPort)';
+			$stmt2 = $pdo->prepare($sql);
+			$stmt2->bindParam(':clientUUID', $mac);
+			$stmt2->bindParam(':MacAddressID', $mac);
+			$active = '1';
+			$stmt2->bindParam(':active', $active);
+			$stmt2->bindParam(':masterTunnelPort', $output['port']);
+			$stmt2->execute();
+		} else {
+			$port = 14000;
+			$output['port'] = $port;
+			$output['status'] = 1;
+			$sql = 'insert into clientSystemMgmtTBL(clientUUID, MacAddressID, active, masterTunnelPort) values(:clientUUID, :MacAddressID, :active, :masterTunnelPort)';
+			$stmt2 = $pdo->prepare($sql);
+			$stmt2->bindParam(':clientUUID', $mac);
+			$stmt2->bindParam(':MacAddressID', $mac);
+			$active = '1';
+			$stmt2->bindParam(':active', $active);
+			$stmt2->bindParam(':masterTunnelPort', $port);
+			$stmt2->execute();
+		}
 		echo rawurlencode(json_encode($output));
 		exit;
 	}
