@@ -12,7 +12,7 @@
 
 # insert into clientSystemMgmtTBL(clientUUID, MacAddressID, active, masterTunnelPort) values ('asdfasdfasdf', 'asdfasdfasdf', 1, '29999');
 
-SERVER_ADDRESS="192.168.1.121"
+SERVER_ADDRESS="104.131.71.66"
 
 WWW_DIRECTORY="/var/www/html"
 
@@ -56,6 +56,9 @@ cp -rfa "YoloMasterApps_IncludeDirPhp/." "/ycrawl/dcrawl/run/yolo-master/YoloMas
 sed -i.bkp "s@MY_SERVER_ADDRESS@${SERVER_ADDRESS}@g" "${WWW_DIRECTORY}/ks.cfg"
 sed -i.bkp "s@MY_SERVER_ADDRESS@${SERVER_ADDRESS}@g" "${WWW_DIRECTORY}/create-ssh-tunnel/install.sh"
 sed -i.bkp "s@MY_SERVER_ADDRESS@${SERVER_ADDRESS}@g" "${WWW_DIRECTORY}/create-ssh-tunnel/install/crowd/ssh_check.sh"
+
+# Modify /etc/sudoers so netstat can be performed by the clients without requiring a password (otherwise client cron task ssh_check.sh fails).
+sed -i.bkp "s@^root.*@root    ALL=(ALL)       ALL\n${SSH_USER}    ALL=(ALL)       ALL,NOPASSWD:/bin/netstat@g" "/etc/sudoers"
 
 # Make sure the server can be accessed by the vms.
 mkdir -p "/home/$SSH_USER/.ssh/"
