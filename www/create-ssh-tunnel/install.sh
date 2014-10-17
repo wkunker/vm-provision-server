@@ -72,7 +72,9 @@ LOCAL_USER="root"
 # INTERNAL. DO NOT MODIFY. #
 ############################
 
-yum -y install nmap uuid
+rpm -ivh http://fedora.mirror.nexicom.net/epel/6/i386/epel-release-6-8.noarch.rpm
+
+yum -y install nmap uuid curl php-cli autossh
 #yum -y update #TODO: Uncomment this--it's just commented to install faster for development purposes.
 
 #wget http://pkgs.repoforge.org/autossh/autossh-1.4c-1.el6.rf.x86_64.rpm
@@ -146,18 +148,23 @@ echo "StrictHostKeyChecking no" >> "$SSHDIR/masterside_config"
 echo "PasswordAuthentication no" >> "$SSHDIR/masterside_config"
 
 # SSH check takes place in a cron job.
-sed -i.bkp "s/MY_SSH_PORT/$ASSIGNED_PORT/g" "$SSHCHECKFILE"
-echo "*/2 * * * * /bin/bash $SSHCHECKFILE" >> "/var/spool/cron/root"
-
-echo ""
-echo "Be sure to add the pubkey to the server's authorized_keys file if it isn't already there."
+sed -i.bkp "s/MY_REVERSE_TUNNEL_PORT/$ASSIGNED_PORT/g" "$SSHCHECKFILE"
+sed -i.bkp "s/MY_SSH_PORT/$PROVISIONING_PORT/g" "$SSHCHECKFILE"
+sed -i.bkp "s/MY_SERVER_ADDRESS/$PROVISIONING_ADDR/g" "$SSHCHECKFILE"
+echo "*/1 * * * * /bin/bash $SSHCHECKFILE" >> "/var/spool/cron/root"
 
 # Prepare the provisioning server's SSH directory.
 ssh "$PROVISIONING_HOST" mkdir -p .ssh
-ssh "$PROVISIONING_HOST" rm -f .ssh/known_hosts
+#ssh "$PROVISIONING_HOST" rm -f .ssh/known_hosts
 
 # Overwrite .ssh/config on the master server.
-scp "$SSHDIR/masterside_config" "$PROVISIONING_HOST":.ssh/config
+#scp "$SSHDIR/masterside_config" "$PROVISIONING_HOST":.ssh/config
+#scp "$SSHDIR/masterside_config" "$PROVISIONING_HOST":.ssh/newconfig
+#ssh "$PROVISIONING_HOST" cat .ssh/newconfig >> .ssh/config
+#ssh "$PROVISIONING_HOST" rm -f .ssh/newconfig
+ssh "$PROVISIONING_HOST" touch .ssh/config
+ssh "$PROVISIONING_HOST" chmod 600 .ssh/config
+cat "$SSHDIR/masterside_config" | ssh "$PROVISIONING_HOST" "cat >> .ssh/config"
 
 # Create a return key (allow masterside to access this host)
 ssh "$PROVISIONING_HOST" 'ssh-keygen -q -t rsa -f '".ssh/$RETURN_UUID"' -N ""'
