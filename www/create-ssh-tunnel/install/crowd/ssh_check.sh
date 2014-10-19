@@ -23,7 +23,7 @@ if [ "$?" != "0" ]; then
 	# Try to close any stale sshd connection on the server. Hide errors since stale sshd isn't a guarantee.
 	# Note that NOPASSWD:/bin/netstat must be set in /etc/sudoers on the server.
 	#ssh -i /root/.ssh/provision user@104.131.71.66 ps aux | grep -v grep | grep 14014 | awk '{print $2}' | xargs kill -9 2> /dev/null
-	pid=$(/usr/bin/ssh -t -i "$LOCAL_IDENTITYFILE" user@${REMOTE_ADDRESS} sudo netstat -antlp | grep -v grep | grep ${REVERSE_TUNNEL_PORT} | grep 127.0.0.1 | awk '{print $7}' | sed 's@/.*@@g' | head -n1)
+	pid=$(/usr/bin/ssh -t -t -i "$LOCAL_IDENTITYFILE" user@${REMOTE_ADDRESS} sudo netstat -antlp | grep -v grep | grep ${REVERSE_TUNNEL_PORT} | grep 127.0.0.1 | awk '{print $7}' | sed 's@/.*@@g' | head -n1)
 	/usr/bin/ssh -i "$LOCAL_IDENTITYFILE" -p ${REMOTE_PORT} user@${REMOTE_ADDRESS} /bin/kill -9 "$pid"
 
 	# Kill any local autossh instances associated with the port as well.
