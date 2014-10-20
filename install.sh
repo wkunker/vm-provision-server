@@ -10,29 +10,9 @@
 #  specified in the variable below.
 # Script must be run with elevated privileges or as root.
 
-# insert into clientSystemMgmtTBL(clientUUID, MacAddressID, active, masterTunnelPort) values ('asdfasdfasdf', 'asdfasdfasdf', 1, '29999');
-
-SERVER_ADDRESS="104.131.71.66"
-
-WWW_DIRECTORY="/var/www/html"
-
-# The user VMs connect as to open a an SSH tunnel.
-SSH_USER="user"
-
 #########################################################
 # DO NOT MODIFY PAST THIS POINT.
 #########################################################
-
-ORIG_DIR=$(pwd)
-
-yum -y install httpd mysql-server php php-pdo php-mysql
-mkdir -p "${WWW_DIRECTORY}/"
-
-adduser "$SSH_USER"
-
-service httpd stop
-service iptables stop
-chkconfig iptables off # TODO: Properly configure the firewall without disabling.
 
 # Get script directory so installation is not dependent on working directory
 #  of parent shell. Follow links for increased environment compatibility.
@@ -46,6 +26,27 @@ done
 DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
 cd "$DIR"
+
+ORIG_DIR=$(pwd)
+
+source "./config.env"
+
+if [ "$?" != "0" ]
+then
+	echo "Failure: config.env could not be sourced. Please make sure you've modified config.env.CHANGEME to match your desired settings, and renamed config.env.CHANGEME to config.env, then try running this script again."
+	cd "$ORIG_DIR"
+	exit 1
+fi
+
+yum -y install httpd mysql-server php php-pdo php-mysql
+mkdir -p "${WWW_DIRECTORY}/"
+
+adduser "$SSH_USER"
+
+service httpd stop
+service iptables stop
+chkconfig iptables off # TODO: Properly configure the firewall without disabling.
+
 
 # Install files to server.
 cp -rfa "www/." "${WWW_DIRECTORY}/"
