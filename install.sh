@@ -14,6 +14,8 @@
 # DO NOT MODIFY PAST THIS POINT.
 #########################################################
 
+ORIG_DIR=$(pwd)
+
 # Get script directory so installation is not dependent on working directory
 #  of parent shell. Follow links for increased environment compatibility.
 # Taken from http://stackoverflow.com/questions/59895/can-a-bash-script-tell-what-directory-its-stored-in
@@ -26,8 +28,6 @@ done
 DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
 cd "$DIR"
-
-ORIG_DIR=$(pwd)
 
 source "./config.env"
 
